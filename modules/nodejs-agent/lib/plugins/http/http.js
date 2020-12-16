@@ -99,6 +99,10 @@ module.exports = function(httpModule, instrumentation, contextManager) {
     function wrapRequest(original) {
         return function(options, callback) {
             let contextCarrier = new ContextCarrier();
+            if (options.headers['trace-context']){
+                contextManager.active(options.headers['trace-context']);
+                delete options.headers['trace-context'];
+            }
             let span = contextManager.createExitSpan(options.path, (options.hostname || options.host) + ":" + options.port, contextCarrier);
             contextCarrier.pushBy(function(key, value) {
                 if (!options.hasOwnProperty("headers") || !options.headers) {
